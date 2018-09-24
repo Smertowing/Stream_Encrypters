@@ -56,36 +56,44 @@ class MainVIewController: NSViewController {
     @IBOutlet weak var encipheredFile: NSTextField!
     
     @IBAction func Encode(_ sender: Any) {
-        keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
-        if keyGenerated.stringValue.count < 24 {
-             dialogError(question: "Please, specify the key!", text: "Error: key is too short.")
-        } else {
-            let LFSR = LFSRkey(key: keyGenerated.stringValue)
-            keyGen = LFSR.generateLFSR(len: represOfFile.stringValue.count)
-            keyGenerated.stringValue = keyGen
-            
-            var tempStr:String = ""
-            for i in 0...represOfFile.stringValue.count-1 {
-                tempStr += String(Int(String(keyGenerated.stringValue[i]))! ^ Int(String(represOfFile.stringValue[i]))!)
+        if represOfFile.stringValue.count > 0 {
+            keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
+            if keyGenerated.stringValue.count < 24 {
+                 dialogError(question: "Please, specify the key!", text: "Error: key is too short.")
+            } else {
+                let LFSR = LFSRkey(key: keyGenerated.stringValue)
+                keyGen = LFSR.generateLFSR(len: represOfFile.stringValue.count)
+                keyGenerated.stringValue = keyGen
+                
+                var tempStr:String = ""
+                for i in 0...represOfFile.stringValue.count-1 {
+                    tempStr += String(Int(String(keyGenerated.stringValue[i]))! ^ Int(String(represOfFile.stringValue[i]))!)
+                }
+                encipheredFile.stringValue = tempStr
             }
-            encipheredFile.stringValue = tempStr
+        } else {
+            dialogError(question: "Please, enter the file!", text: "Error: file is empty")
         }
     }
     
     @IBAction func Decode(_ sender: Any) {
-        keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
-        if keyGenerated.stringValue.count < 24 {
-            dialogError(question: "Please, specify the key!", text: "Error: key is too short.")
-        } else {
-            let LFSR = LFSRkey(key: keyGenerated.stringValue)
-            keyGen = LFSR.generateLFSR(len: encipheredFile.stringValue.count)
-            keyGenerated.stringValue = keyGen
-            
-            var tempStr:String = ""
-            for i in 0...encipheredFile.stringValue.count-1 {
-                tempStr += String(Int(String(keyGenerated.stringValue[i]))! ^ Int(String(encipheredFile.stringValue[i]))!)
+        if encipheredFile.stringValue.count > 0 {
+            keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
+            if keyGenerated.stringValue.count < 24 {
+                dialogError(question: "Please, specify the key!", text: "Error: key is too short.")
+            } else {
+                let LFSR = LFSRkey(key: keyGenerated.stringValue)
+                keyGen = LFSR.generateLFSR(len: encipheredFile.stringValue.count)
+                keyGenerated.stringValue = keyGen
+                
+                var tempStr: String = ""
+                for i in 0...encipheredFile.stringValue.count-1 {
+                    tempStr += String(Int(String(keyGenerated.stringValue[i]))! ^ Int(String(encipheredFile.stringValue[i]))!)
+                }
+                represOfFile.stringValue = tempStr
             }
-            represOfFile.stringValue = tempStr
+        } else {
+        dialogError(question: "Please, enter the file!", text: "Error: file is empty")
         }
     }
     
@@ -138,7 +146,7 @@ class MainVIewController: NSViewController {
         } else {
             let outputStream = OutputStream(toFileAtPath: fileURL.path, append: false)!
             var outputBuffer: [UInt8] = []
-            var tempString:String = ""
+            var tempString: String = ""
             switch sender.tag {
             case 0:
                 tempString = represOfFile.stringValue

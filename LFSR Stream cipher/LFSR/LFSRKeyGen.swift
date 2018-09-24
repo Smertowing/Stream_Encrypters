@@ -15,15 +15,15 @@ fileprivate extension String {
 }
 
 class LFSRkey {
-    var key = "101010101010101010101010"
+    var key: String
     var positions: [Int] = [1,3,4,24] //x24 + x4 + x3 + x + 1
     
-    init(key:String){
+    init(key: String){
         self.key = key
 
     }
     
-    init(key:String, positions: [Int]){
+    init(key: String, positions: [Int]){
         self.key = key
         self.positions = positions
     }
