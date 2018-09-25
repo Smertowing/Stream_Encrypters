@@ -28,19 +28,27 @@ class LFSRkey {
         self.positions = positions
     }
 
-    func generateLFSR(len: Int) -> String {
-        var str: String = ""
+    func generateLFSR(len: Int) -> [UInt8] {
+        var col: [UInt8] = []
         var tempKey = key
-        for _ in 1...len {
-            var tempAppend = 0
-            for i in positions {
-                tempAppend ^= Int(String(tempKey[tempKey.count-i]))!
+        var l = len
+        while l > 0 {
+            var tempKeyAppend: UInt8 = 0
+            for i in 0...7 {
+                var tempAppend: UInt8 = 0
+                for j in positions {
+                    tempAppend ^= UInt8(String(tempKey[tempKey.count-j]))!
+                }
+                l -= 1
+                tempKey.append(String(tempAppend)[0])
+                if tempKey.removeFirst() == "1" {
+                    tempKeyAppend += UInt8(pow(Double(2), Double(7-i)))
+                }
             }
-            tempKey.append(String(tempAppend)[0])
-            str.append(tempKey.removeFirst())
+            col.append(tempKeyAppend)
         }
 
-        return str
+        return col
     }
     
     

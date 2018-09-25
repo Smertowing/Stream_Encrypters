@@ -18,12 +18,11 @@ fileprivate extension String {
 
 func browseFile(sender: AnyObject) -> String {
     let browse = NSOpenPanel()
-    browse.title                   = "Choose a .txt file"
+    browse.title                   = "Choose a file"
     browse.showsResizeIndicator    = true
     browse.canChooseDirectories    = false
     browse.canCreateDirectories    = true
     browse.allowsMultipleSelection = false
-    browse.allowedFileTypes = ["txt"]
     if (browse.runModal() == NSApplication.ModalResponse.OK) {
         let result = browse.url
         
@@ -45,6 +44,9 @@ func dialogError(question: String, text: String) {
 
 class MainVIewController: NSViewController {
     var keyGen: String = ""
+    var inputBuff: [UInt8] = []
+    var outputBuff: [UInt8] = []
+    var keyBuff: [UInt8] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,19 +59,21 @@ class MainVIewController: NSViewController {
     
     @IBAction func Encode(_ sender: Any) {
         if represOfFile.stringValue.count > 0 {
-            keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
+        //    keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
             if keyGenerated.stringValue.count < 24 {
                  dialogError(question: "Please, specify the key!", text: "Error: key is too short.")
             } else {
                 let LFSR = LFSRkey(key: keyGenerated.stringValue)
-                keyGen = LFSR.generateLFSR(len: represOfFile.stringValue.count)
-                keyGenerated.stringValue = keyGen
+                keyBuff = LFSR.generateLFSR(len: represOfFile.stringValue.count)
+      //          keyGenerated.stringValue = keyGen
                 
-                var tempStr:String = ""
-                for i in 0...represOfFile.stringValue.count-1 {
-                    tempStr += String(Int(String(keyGenerated.stringValue[i]))! ^ Int(String(represOfFile.stringValue[i]))!)
+                outputBuff = []
+                for i in 0...inputBuff.count-1 {
+                    let kek: UInt8 = inputBuff[i] ^ keyBuff[i]
+                    outputBuff.append(kek)
+                    encipheredFile.stringValue += String(kek)
                 }
-                encipheredFile.stringValue = tempStr
+                
             }
         } else {
             dialogError(question: "Please, enter the file!", text: "Error: file is empty")
@@ -78,19 +82,20 @@ class MainVIewController: NSViewController {
     
     @IBAction func Decode(_ sender: Any) {
         if encipheredFile.stringValue.count > 0 {
-            keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
+       //     keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
             if keyGenerated.stringValue.count < 24 {
                 dialogError(question: "Please, specify the key!", text: "Error: key is too short.")
             } else {
                 let LFSR = LFSRkey(key: keyGenerated.stringValue)
-                keyGen = LFSR.generateLFSR(len: encipheredFile.stringValue.count)
-                keyGenerated.stringValue = keyGen
+                keyBuff = LFSR.generateLFSR(len: encipheredFile.stringValue.count)
+         //       keyGenerated.stringValue = keyGen
                 
-                var tempStr: String = ""
-                for i in 0...encipheredFile.stringValue.count-1 {
-                    tempStr += String(Int(String(keyGenerated.stringValue[i]))! ^ Int(String(encipheredFile.stringValue[i]))!)
+                inputBuff = []
+                for i in 0...outputBuff.count-1 {
+                    let kek: UInt8 = outputBuff[i] ^ keyBuff[i]
+                    inputBuff.append(kek)
+                    represOfFile.stringValue += String(kek)
                 }
-                represOfFile.stringValue = tempStr
             }
         } else {
         dialogError(question: "Please, enter the file!", text: "Error: file is empty")
@@ -101,38 +106,53 @@ class MainVIewController: NSViewController {
         let fileURL = URL(fileURLWithPath: browseFile(sender: self))
         if fileURL.path == "" {
         } else {
-            let inputStream = InputStream(fileAtPath: fileURL.path)!
-            var inputBuffer = [UInt8](repeating: 0, count: 32478734 * 4)
-            inputStream.open()
-            inputStream.read(&inputBuffer, maxLength: inputBuffer.count)
-            inputStream.close()
             
+            let filePath = fileURL.path
+            var fileSize: UInt64 = 0
+            do {
+                let attr = try FileManager.default.attributesOfItem(atPath: filePath)
+                fileSize = attr[FileAttributeKey.size] as! UInt64
+                let dict = attr as NSDictionary
+                fileSize = dict.fileSize()
+            } catch {
+       
+            }
+            let inputStream = InputStream(fileAtPath: fileURL.path)!
+       //     var inputBuffer = [UInt8](repeating: 0, count: Int(fileSize))
             switch sender.tag {
             case 0:
+                inputBuff = [UInt8](repeating: 0, count: Int(fileSize))
+                inputStream.open()
+                inputStream.read(&inputBuff, maxLength: Int(fileSize))
+                inputStream.close()
                 represOfFile.stringValue = ""
-                outerLoop: for i in inputBuffer {
+                outerLoop: for i in inputBuff {
                     var str = String(i, radix: 2)
                     while str.count < 8 {
                         str = "0" + str
                     }
-                    if str != "00000000" {
+//                    if str != "00000000" {
                         represOfFile.stringValue.append(str)
-                    } else {
-                        break outerLoop
-                    }
+//                    } else {
+//                        break outerLoop
+//                    }
                 }
             case 1:
+                outputBuff = [UInt8](repeating: 0, count: Int(fileSize))
+                inputStream.open()
+                inputStream.read(&outputBuff, maxLength: Int(fileSize))
+                inputStream.close()
                 encipheredFile.stringValue = ""
-                outerLoop: for i in inputBuffer {
+                outerLoop: for i in outputBuff {
                     var str = String(i, radix: 2)
                     while str.count < 8 {
                         str = "0" + str
                     }
-                    if str != "00000000" {
+//                    if str != "00000000" {
                         encipheredFile.stringValue.append(str)
-                    } else {
-                        break outerLoop
-                    }
+//                    } else {
+//                        break outerLoop
+//                    }
                 }
             default:
                 break
@@ -145,28 +165,19 @@ class MainVIewController: NSViewController {
         if fileURL.path == "" {
         } else {
             let outputStream = OutputStream(toFileAtPath: fileURL.path, append: false)!
-            var outputBuffer: [UInt8] = []
-            var tempString: String = ""
+      //      var outputBuffer: [UInt8] = []
             switch sender.tag {
             case 0:
-                tempString = represOfFile.stringValue
+                outputStream.open()
+                outputStream.write(inputBuff, maxLength: inputBuff.count)
+                outputStream.close()
             case 1:
-                tempString = encipheredFile.stringValue
+                outputStream.open()
+                outputStream.write(outputBuff, maxLength: outputBuff.count)
+                outputStream.close()
             default:
                 break
             }
-            while tempString.count > 0 {
-                var tempUInt8: UInt8 = 0
-                for i in 0...7 {
-                    if tempString.removeFirst() == "1" {
-                        tempUInt8 += UInt8(pow(Double(2), Double(7-i)))
-                    }
-                }
-                outputBuffer.append(tempUInt8)
-            }
-            outputStream.open()
-            outputStream.write(outputBuffer, maxLength: outputBuffer.count)
-            outputStream.close()
         }
     }
     
