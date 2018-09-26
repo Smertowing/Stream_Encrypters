@@ -723,7 +723,7 @@
                             <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rfm-Md-OVa">
                                 <rect key="frame" x="20" y="45" width="875" height="200"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="charWrapping" selectable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="hLC-UK-pac">
+                                <textFieldCell key="cell" lineBreakMode="charWrapping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="hLC-UK-pac">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -779,7 +779,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="Encode:" target="XfG-lQ-9wD" id="FWU-Yh-ttK"/>
+                                    <action selector="newEncode:" target="XfG-lQ-9wD" id="GHG-ig-S2X"/>
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u3N-iq-n9s">
@@ -828,7 +828,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="Decode:" target="XfG-lQ-9wD" id="Npj-bS-b14"/>
+                                    <action selector="newDecode:" target="XfG-lQ-9wD" id="Ojn-CW-fi7"/>
                                 </connections>
                             </button>
                         </subviews>
