@@ -59,35 +59,33 @@ class MainVIewController: NSViewController {
     @IBAction func newEncode(_ sender: Any) {
         if represOfFile.stringValue.count > 0 {
             keyGenerated.stringValue = keyGenerated.stringValue.filter { return ["0","1"].contains($0) }
-            if (keyGenerated.stringValue.count < 24)||(keyGenerated.stringValue.count > 64) {
+            if (keyGenerated.stringValue.count != 24) {
                  dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
             } else {
                 let LFSR = LFSRkey(key: keyGenerated.stringValue)
                 keyBuff = LFSR.generateLFSR(len: inputBuff.count)
                 keyGenerated.stringValue = ""
-                for i in keyBuff {
-                    if keyGenerated.stringValue.count <= 3000 {
-                        var tempS = String(i, radix: 2)
+                encipheredFile.stringValue = ""
+                for i in 0...keyBuff.count-1 {
+                    if keyGenerated.stringValue.count <= 1500 {
+                        var tempS = String(keyBuff[i], radix: 2)
                         while tempS.count < 8 {
                             tempS = "0" + tempS
                         }
                         keyGenerated.stringValue += tempS
+                
+                        var tempS1 = String(inputBuff[i] ^ keyBuff[i], radix: 2)
+                        while tempS1.count < 8 {
+                            tempS1 = "0" + tempS1
+                        }
+                        encipheredFile.stringValue += tempS1
                     } else {
                         break
                     }
                 }
-                outputBuff = []
-                encipheredFile.stringValue = ""
+                outputBuff.removeAll()
                 for i in 0...inputBuff.count-1 {
-                    let kek: UInt8 = inputBuff[i] ^ keyBuff[i]
-                    outputBuff.append(kek)
-                    if encipheredFile.stringValue.count <= 3000 {
-                        var tempS = String(kek, radix: 2)
-                        while tempS.count < 8 {
-                            tempS = "0" + tempS
-                        }
-                        encipheredFile.stringValue += tempS
-                    }
+                    outputBuff.append(inputBuff[i] ^ keyBuff[i])
                 }
                 
             }
@@ -105,29 +103,27 @@ class MainVIewController: NSViewController {
                 let LFSR = LFSRkey(key: keyGenerated.stringValue)
                 keyBuff = LFSR.generateLFSR(len: outputBuff.count)
                 keyGenerated.stringValue = ""
-                for i in keyBuff {
-                    if keyGenerated.stringValue.count <= 3000 {
-                        var tempS = String(i, radix: 2)
+                represOfFile.stringValue = ""
+                for i in 0...keyBuff.count-1 {
+                    if keyGenerated.stringValue.count <= 1500 {
+                        var tempS = String(keyBuff[i], radix: 2)
                         while tempS.count < 8 {
                             tempS = "0" + tempS
                         }
                         keyGenerated.stringValue += tempS
+                        
+                        var tempS1 = String(outputBuff[i] ^ keyBuff[i], radix: 2)
+                        while tempS1.count < 8 {
+                            tempS1 = "0" + tempS1
+                        }
+                        represOfFile.stringValue += tempS1
                     } else {
                         break
                     }
                 }
-                inputBuff = []
-                represOfFile.stringValue = ""
+                inputBuff.removeAll()
                 for i in 0...outputBuff.count-1 {
-                    let kek: UInt8 = outputBuff[i] ^ keyBuff[i]
-                    inputBuff.append(kek)
-                    if represOfFile.stringValue.count <= 3000 {
-                        var tempS = String(kek, radix: 2)
-                        while tempS.count < 8 {
-                            tempS = "0" + tempS
-                        }
-                        represOfFile.stringValue += tempS
-                    }
+                    inputBuff.append(outputBuff[i] ^ keyBuff[i])
                 }
                 
             }
@@ -198,7 +194,7 @@ class MainVIewController: NSViewController {
                 inputStream.close()
                 represOfFile.stringValue = ""
                 outerLoop: for i in inputBuff {
-                    if represOfFile.stringValue.count >= 10000 {
+                    if represOfFile.stringValue.count >= 1500 {
                         break outerLoop
                     }
                     var str = String(i, radix: 2)
@@ -214,7 +210,7 @@ class MainVIewController: NSViewController {
                 inputStream.close()
                 encipheredFile.stringValue = ""
                 outerLoop: for i in outputBuff {
-                    if encipheredFile.stringValue.count >= 10000 {
+                    if encipheredFile.stringValue.count >= 1500 {
                         break outerLoop
                     }
                     var str = String(i, radix: 2)
