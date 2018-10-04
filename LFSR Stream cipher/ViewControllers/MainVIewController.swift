@@ -136,6 +136,8 @@ class MainVIewController: NSViewController {
     @IBAction func justDecode(_ sender: Any) {
         if encipheredFile.stringValue.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
+            key2.stringValue = key2.stringValue.filter { return ["0","1"].contains($0) }
+            key3.stringValue = key3.stringValue.filter { return ["0","1"].contains($0) }
             if (key1.stringValue.count != 24) {
                 dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
             } else {
@@ -175,8 +177,10 @@ class MainVIewController: NSViewController {
     @IBAction func encodeGeffe(_ sender: NSButton) {
         if represOfFile.stringValue.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
-            if (key1.stringValue.count != 24) {
-                dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
+            key2.stringValue = key2.stringValue.filter { return ["0","1"].contains($0) }
+            key3.stringValue = key3.stringValue.filter { return ["0","1"].contains($0) }
+            if (key1.stringValue.count != 24) || (key2.stringValue.count != 32) || (key3.stringValue.count != 40) {
+                dialogError(question: "Please, specify the key!", text: "Error: keys must be 24,32,40 bit.")
             } else {
                 var keyRegister1 = generateKey(key1.stringValue)
                 var keyRegister2 = generateKey(key2.stringValue)
@@ -224,8 +228,8 @@ class MainVIewController: NSViewController {
     @IBAction func decodeGeffe(_ sender: Any) {
         if encipheredFile.stringValue.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
-            if (key1.stringValue.count != 24) {
-                dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
+            if (key1.stringValue.count != 24) || (key2.stringValue.count != 32) || (key3.stringValue.count != 40) {
+                dialogError(question: "Please, specify the key!", text: "Error: keys must be 24,32,40 bit.")
             } else {
                 var keyRegister1 = generateKey(key1.stringValue)
                 var keyRegister2 = generateKey(key2.stringValue)
