@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F3CC9CA12158D90900C96AED /* LFSRKeyGen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3CC9CA02158D90900C96AED /* LFSRKeyGen.swift */; };
 		F3CC9CA32158DE5F00C96AED /* MainVIewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3CC9CA22158DE5F00C96AED /* MainVIewController.swift */; };
 		F3FD93C5214EF70C00A2C3CB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3FD93C4214EF70C00A2C3CB /* AppDelegate.swift */; };
 		F3FD93C7214EF70C00A2C3CB /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3FD93C6214EF70C00A2C3CB /* ViewController.swift */; };
@@ -16,7 +15,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F3CC9CA02158D90900C96AED /* LFSRKeyGen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LFSRKeyGen.swift; sourceTree = "<group>"; };
 		F3CC9CA22158DE5F00C96AED /* MainVIewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVIewController.swift; sourceTree = "<group>"; };
 		F3CC9CA4215917A800C96AED /* LFSR Stream cipher.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "LFSR Stream cipher.entitlements"; sourceTree = "<group>"; };
 		F3FD93C1214EF70C00A2C3CB /* LFSR Stream cipher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LFSR Stream cipher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -39,14 +37,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F3CC9CA5215934D800C96AED /* LFSR */ = {
-			isa = PBXGroup;
-			children = (
-				F3CC9CA02158D90900C96AED /* LFSRKeyGen.swift */,
-			);
-			path = LFSR;
-			sourceTree = "<group>";
-		};
 		F3CC9CA6215934FD00C96AED /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -79,7 +69,6 @@
 				F3FD93C6214EF70C00A2C3CB /* ViewController.swift */,
 				F3CC9CA6215934FD00C96AED /* ViewControllers */,
 				F3FD93C8214EF70D00A2C3CB /* Assets.xcassets */,
-				F3CC9CA5215934D800C96AED /* LFSR */,
 				F3FD93CA214EF70D00A2C3CB /* Main.storyboard */,
 				F3FD93CD214EF70D00A2C3CB /* Info.plist */,
 				F3FD93CE214EF70D00A2C3CB /* LFSR_Stream_cipher.entitlements */,
@@ -165,7 +154,6 @@
 			files = (
 				F3CC9CA32158DE5F00C96AED /* MainVIewController.swift in Sources */,
 				F3FD93C7214EF70C00A2C3CB /* ViewController.swift in Sources */,
-				F3CC9CA12158D90900C96AED /* LFSRKeyGen.swift in Sources */,
 				F3FD93C5214EF70C00A2C3CB /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

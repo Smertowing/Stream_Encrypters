@@ -50,6 +50,8 @@ class MainVIewController: NSViewController {
     var keyBuff2: [UInt8] = []
     var keyBuff3: [UInt8] = []
     
+    var positions: [[Int]] = [[0,2,3,23],[0,26,7,31],[1,18,20,39]]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         key1.stringValue = "101010101010101010101010"
@@ -64,186 +66,203 @@ class MainVIewController: NSViewController {
     @IBOutlet weak var key2: NSTextField!
     @IBOutlet weak var key3: NSTextField!
     
-    @IBAction func newEncode(_ sender: Any) {
+    func generateKey(_ keyString: String) -> UInt {
+        var tempK: UInt = 0
+        for i in 1...keyString.count {
+            if keyString[i-1] == "1" {
+                let t: UInt = 1 << (keyString.count-i)
+                tempK += t
+            }
+        }
+        return tempK
+    }
+    
+    func generateLFSR( forKey tempKey: inout UInt, withLength length: Int, forRegister posits: [Int]) -> UInt8 {
+        var tempKeyAppend: UInt = 0
+        for _ in 0...7 {
+            var xor: UInt = 0
+            for j in posits {
+                let t = (tempKey >> j) & UInt(1)
+                xor ^= t
+            }
+            tempKeyAppend ^= (tempKey >> (length-1)) & 1
+            tempKeyAppend <<= 1
+            tempKey <<= 1
+            tempKey ^= xor
+        }
+        tempKeyAppend >>= 1
+        return UInt8(tempKeyAppend)
+    }
+    
+    @IBAction func justEncode(_ sender: Any) {
         if represOfFile.stringValue.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
             if (key1.stringValue.count != 24) {
-                 dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
+                dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
             } else {
-                let LFSR = LFSRkey(key: key1.stringValue)
-                keyBuff = LFSR.generateLFSR(len: inputBuff.count)
+                var keyRegister = generateKey(key1.stringValue)
                 keyGenerated.stringValue = ""
                 encipheredFile.stringValue = ""
-                for i in 0...keyBuff.count-1 {
-                    if keyGenerated.stringValue.count <= 1500 {
-                        var tempS = String(keyBuff[i], radix: 2)
-                        while tempS.count < 8 {
-                            tempS = "0" + tempS
-                        }
-                        keyGenerated.stringValue += tempS
-                
-                        var tempS1 = String(inputBuff[i] ^ keyBuff[i], radix: 2)
-                        while tempS1.count < 8 {
-                            tempS1 = "0" + tempS1
-                        }
-                        encipheredFile.stringValue += tempS1
-                    } else {
-                        break
-                    }
-                }
                 outputBuff.removeAll()
-                for i in 0...inputBuff.count-1 {
-                    outputBuff.append(inputBuff[i] ^ keyBuff[i])
+                var i = 0
+                while (i < inputBuff.count) && (i < 100) {
+                    let key8Bits = generateLFSR(forKey: &keyRegister, withLength: key1.stringValue.count, forRegister: positions[0])
+                    var tempS = String(key8Bits, radix: 2)
+                    while tempS.count < 8 {
+                        tempS = "0" + tempS
+                    }
+                    keyGenerated.stringValue += tempS
+                    
+                    let tempChu = inputBuff[i] ^ key8Bits
+                    var tempS1 = String(tempChu, radix: 2)
+                    while tempS1.count < 8 {
+                        tempS1 = "0" + tempS1
+                    }
+                    encipheredFile.stringValue += tempS1
+                    
+                    outputBuff.append(tempChu)
+                    i += 1
                 }
-                
+                while (i < inputBuff.count) {
+                    outputBuff.append(inputBuff[i] ^ generateLFSR(forKey: &keyRegister, withLength: key1.stringValue.count, forRegister: positions[0]))
+                    i += 1
+                }
             }
         } else {
             dialogError(question: "Please, enter the file!", text: "Error: file is empty")
         }
     }
     
-    @IBAction func newDecode(_ sender: Any) {
+    @IBAction func justDecode(_ sender: Any) {
         if encipheredFile.stringValue.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
             if (key1.stringValue.count != 24) {
                 dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
             } else {
-                let LFSR = LFSRkey(key: key1.stringValue)
-                keyBuff = LFSR.generateLFSR(len: outputBuff.count)
+                var keyRegister = generateKey(key1.stringValue)
                 keyGenerated.stringValue = ""
                 represOfFile.stringValue = ""
-                for i in 0...keyBuff.count-1 {
-                    if keyGenerated.stringValue.count <= 1500 {
-                        var tempS = String(keyBuff[i], radix: 2)
-                        while tempS.count < 8 {
-                            tempS = "0" + tempS
-                        }
-                        keyGenerated.stringValue += tempS
-                        
-                        var tempS1 = String(outputBuff[i] ^ keyBuff[i], radix: 2)
-                        while tempS1.count < 8 {
-                            tempS1 = "0" + tempS1
-                        }
-                        represOfFile.stringValue += tempS1
-                    } else {
-                        break
-                    }
-                }
                 inputBuff.removeAll()
-                for i in 0...outputBuff.count-1 {
-                    inputBuff.append(outputBuff[i] ^ keyBuff[i])
+                var i = 0
+                while (i < outputBuff.count) && (i < 100) {
+                    let key8Bits = generateLFSR(forKey: &keyRegister, withLength: key1.stringValue.count, forRegister: positions[0])
+                    var tempS = String(key8Bits, radix: 2)
+                    while tempS.count < 8 {
+                        tempS = "0" + tempS
+                    }
+                    keyGenerated.stringValue += tempS
+                    
+                    let tempChu = outputBuff[i] ^ key8Bits
+                    var tempS1 = String(tempChu, radix: 2)
+                    while tempS1.count < 8 {
+                        tempS1 = "0" + tempS1
+                    }
+                    represOfFile.stringValue += tempS1
+                    
+                    inputBuff.append(tempChu)
+                    i += 1
                 }
-                
+                while (i < outputBuff.count) {
+                    inputBuff.append(outputBuff[i] ^ generateLFSR(forKey: &keyRegister, withLength: key1.stringValue.count, forRegister: positions[0]))
+                    i += 1
+                }
             }
         } else {
             dialogError(question: "Please, enter the file!", text: "Error: file is empty")
         }
     }
-  
     
-    @IBAction func EncodeGeffe(_ sender: NSButton) {
+    @IBAction func encodeGeffe(_ sender: NSButton) {
         if represOfFile.stringValue.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
-            key2.stringValue = key2.stringValue.filter { return ["0","1"].contains($0) }
-            key3.stringValue = key3.stringValue.filter { return ["0","1"].contains($0) }
             if (key1.stringValue.count != 24) {
-                dialogError(question: "Please, specify the key!", text: "Error: key1 must be 24-bit.")
-            } else
-                if (key2.stringValue.count != 32) {
-                    dialogError(question: "Please, specify the key!", text: "Error: key2 must be 32-bit.")
-                } else
-                    if (key3.stringValue.count != 40) {
-                        dialogError(question: "Please, specify the key!", text: "Error: key3 must be 40-bit.")
-                    } else {
-                        let LFSR1 = LFSRkey(key: key1.stringValue)
-                        let LFSR2 = LFSRkey(key: key2.stringValue, positions: [1,27,28,32])
-                        let LFSR3 = LFSRkey(key: key3.stringValue, positions: [2,19,21,40])
-                        keyBuff1 = LFSR1.generateLFSR(len: inputBuff.count)
-                        keyBuff2 = LFSR2.generateLFSR(len: inputBuff.count)
-                        keyBuff3 = LFSR3.generateLFSR(len: inputBuff.count)
-                        keyBuff.removeAll()
-                        for i in 0...inputBuff.count-1 {
-                            keyBuff.append((keyBuff1[i] & keyBuff2[i]) | (~keyBuff1[i] & keyBuff3[i])) 
-                        }
-                        
-                        keyGenerated.stringValue = ""
-                        encipheredFile.stringValue = ""
-                        for i in 0...keyBuff.count-1 {
-                            if keyGenerated.stringValue.count <= 1500 {
-                                var tempS = String(keyBuff[i], radix: 2)
-                                while tempS.count < 8 {
-                                    tempS = "0" + tempS
-                                }
-                                keyGenerated.stringValue += tempS
-                                
-                                var tempS1 = String(inputBuff[i] ^ keyBuff[i], radix: 2)
-                                while tempS1.count < 8 {
-                                    tempS1 = "0" + tempS1
-                                }
-                                encipheredFile.stringValue += tempS1
-                            } else {
-                                break
-                            }
-                        }
-                        outputBuff.removeAll()
-                        for i in 0...inputBuff.count-1 {
-                            outputBuff.append(inputBuff[i] ^ keyBuff[i])
-                        }
+                dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
+            } else {
+                var keyRegister1 = generateKey(key1.stringValue)
+                var keyRegister2 = generateKey(key2.stringValue)
+                var keyRegister3 = generateKey(key3.stringValue)
+                keyGenerated.stringValue = ""
+                encipheredFile.stringValue = ""
+                outputBuff.removeAll()
+                var i = 0
+                while (i < inputBuff.count) && (i < 100) {
+                    let key8Bits1 = generateLFSR(forKey: &keyRegister1, withLength: key1.stringValue.count, forRegister: positions[0])
+                    let key8Bits2 = generateLFSR(forKey: &keyRegister2, withLength: key1.stringValue.count, forRegister: positions[1])
+                    let key8Bits3 = generateLFSR(forKey: &keyRegister3, withLength: key1.stringValue.count, forRegister: positions[2])
+                    let key8Bits = (key8Bits1 & key8Bits2) | (~key8Bits1 & key8Bits3)
                     
+                    var tempS = String(key8Bits, radix: 2)
+                    while tempS.count < 8 {
+                        tempS = "0" + tempS
+                    }
+                    keyGenerated.stringValue += tempS
+                    
+                    let tempChu = inputBuff[i] ^ key8Bits
+                    var tempS1 = String(tempChu, radix: 2)
+                    while tempS1.count < 8 {
+                        tempS1 = "0" + tempS1
+                    }
+                    encipheredFile.stringValue += tempS1
+                    
+                    outputBuff.append(tempChu)
+                    i += 1
+                }
+                while (i < inputBuff.count) {
+                    let key8Bits1 = generateLFSR(forKey: &keyRegister1, withLength: key1.stringValue.count, forRegister: positions[0])
+                    let key8Bits2 = generateLFSR(forKey: &keyRegister2, withLength: key1.stringValue.count, forRegister: positions[1])
+                    let key8Bits3 = generateLFSR(forKey: &keyRegister3, withLength: key1.stringValue.count, forRegister: positions[2])
+                    let key8Bits = (key8Bits1 & key8Bits2) | (~key8Bits1 & key8Bits3)
+                    outputBuff.append(inputBuff[i] ^ key8Bits)
+                    i += 1
+                }
             }
         } else {
             dialogError(question: "Please, enter the file!", text: "Error: file is empty")
         }
     }
-        
-    @IBAction func decodeGeffe(_ sender: NSButton) {
+    
+    @IBAction func decodeGeffe(_ sender: Any) {
         if encipheredFile.stringValue.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
-            key2.stringValue = key2.stringValue.filter { return ["0","1"].contains($0) }
-            key3.stringValue = key3.stringValue.filter { return ["0","1"].contains($0) }
             if (key1.stringValue.count != 24) {
-                dialogError(question: "Please, specify the key!", text: "Error: key1 must be 24-bit.")
-            } else
-                if (key2.stringValue.count != 32) {
-                    dialogError(question: "Please, specify the key!", text: "Error: key2 must be 32-bit.")
-                } else
-                    if (key3.stringValue.count != 40) {
-                        dialogError(question: "Please, specify the key!", text: "Error: key3 must be 40-bit.")
-                    } else {
-                        let LFSR1 = LFSRkey(key: key1.stringValue)
-                        let LFSR2 = LFSRkey(key: key2.stringValue)
-                        let LFSR3 = LFSRkey(key: key3.stringValue)
-                        keyBuff1 = LFSR1.generateLFSR(len: outputBuff.count)
-                        keyBuff2 = LFSR2.generateLFSR(len: outputBuff.count)
-                        keyBuff3 = LFSR3.generateLFSR(len: outputBuff.count)
-                        for i in 0...outputBuff.count-1 {
-                            keyBuff[i] = (keyBuff1[i] & keyBuff2[i]) | (~keyBuff1[i] & keyBuff3[i])
-                        }
-                        
-                        keyGenerated.stringValue = ""
-                        represOfFile.stringValue = ""
-                        for i in 0...keyBuff.count-1 {
-                            if keyGenerated.stringValue.count <= 1500 {
-                                var tempS = String(keyBuff[i], radix: 2)
-                                while tempS.count < 8 {
-                                    tempS = "0" + tempS
-                                }
-                                keyGenerated.stringValue += tempS
-                                
-                                var tempS1 = String(outputBuff[i] ^ keyBuff[i], radix: 2)
-                                while tempS1.count < 8 {
-                                    tempS1 = "0" + tempS1
-                                }
-                                represOfFile.stringValue += tempS1
-                            } else {
-                                break
-                            }
-                        }
-                        inputBuff.removeAll()
-                        for i in 0...outputBuff.count-1 {
-                            inputBuff.append(outputBuff[i] ^ keyBuff[i])
-                        }
-                        
+                dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
+            } else {
+                var keyRegister1 = generateKey(key1.stringValue)
+                var keyRegister2 = generateKey(key2.stringValue)
+                var keyRegister3 = generateKey(key3.stringValue)
+                keyGenerated.stringValue = ""
+                represOfFile.stringValue = ""
+                inputBuff.removeAll()
+                var i = 0
+                while (i < outputBuff.count) && (i < 100) {
+                    let key8Bits1 = generateLFSR(forKey: &keyRegister1, withLength: key1.stringValue.count, forRegister: positions[0])
+                    let key8Bits2 = generateLFSR(forKey: &keyRegister2, withLength: key1.stringValue.count, forRegister: positions[1])
+                    let key8Bits3 = generateLFSR(forKey: &keyRegister3, withLength: key1.stringValue.count, forRegister: positions[2])
+                    let key8Bits = (key8Bits1 & key8Bits2) | (~key8Bits1 & key8Bits3)
+                    var tempS = String(key8Bits, radix: 2)
+                    while tempS.count < 8 {
+                        tempS = "0" + tempS
+                    }
+                    keyGenerated.stringValue += tempS
+                    
+                    let tempChu = outputBuff[i] ^ key8Bits
+                    var tempS1 = String(tempChu, radix: 2)
+                    while tempS1.count < 8 {
+                        tempS1 = "0" + tempS1
+                    }
+                    represOfFile.stringValue += tempS1
+                    
+                    inputBuff.append(tempChu)
+                    i += 1
+                }
+                while (i < outputBuff.count) {
+                    let key8Bits1 = generateLFSR(forKey: &keyRegister1, withLength: key1.stringValue.count, forRegister: positions[0])
+                    let key8Bits2 = generateLFSR(forKey: &keyRegister2, withLength: key1.stringValue.count, forRegister: positions[1])
+                    let key8Bits3 = generateLFSR(forKey: &keyRegister3, withLength: key1.stringValue.count, forRegister: positions[2])
+                    let key8Bits = (key8Bits1 & key8Bits2) | (~key8Bits1 & key8Bits3)
+                    inputBuff.append(outputBuff[i] ^ key8Bits)
+                    i += 1
+                }
             }
         } else {
             dialogError(question: "Please, enter the file!", text: "Error: file is empty")
@@ -272,7 +291,7 @@ class MainVIewController: NSViewController {
                 inputStream.close()
                 represOfFile.stringValue = ""
                 outerLoop: for i in inputBuff {
-                    if represOfFile.stringValue.count >= 1500 {
+                    if represOfFile.stringValue.count >= 800 {
                         break outerLoop
                     }
                     var str = String(i, radix: 2)
@@ -288,7 +307,7 @@ class MainVIewController: NSViewController {
                 inputStream.close()
                 encipheredFile.stringValue = ""
                 outerLoop: for i in outputBuff {
-                    if encipheredFile.stringValue.count >= 1500 {
+                    if encipheredFile.stringValue.count >= 800 {
                         break outerLoop
                     }
                     var str = String(i, radix: 2)

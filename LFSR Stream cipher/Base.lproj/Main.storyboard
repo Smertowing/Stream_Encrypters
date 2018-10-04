@@ -777,10 +777,10 @@
                                 <buttonCell key="cell" type="push" title="Encode" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9LG-Bj-dip">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
+                                    <connections>
+                                        <action selector="justEncode:" target="XfG-lQ-9wD" id="D8g-i5-Ehb"/>
+                                    </connections>
                                 </buttonCell>
-                                <connections>
-                                    <action selector="newEncode:" target="XfG-lQ-9wD" id="GHG-ig-S2X"/>
-                                </connections>
                             </button>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MnJ-0G-kwv">
                                 <rect key="frame" x="899" y="362" width="123" height="32"/>
@@ -790,7 +790,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="EncodeGeffe:" target="XfG-lQ-9wD" id="pXM-2w-PsD"/>
+                                    <action selector="encodeGeffe:" target="XfG-lQ-9wD" id="vXA-WY-Xy6"/>
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u3N-iq-n9s">
@@ -839,7 +839,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="newDecode:" target="XfG-lQ-9wD" id="Ojn-CW-fi7"/>
+                                    <action selector="justDecode:" target="XfG-lQ-9wD" id="cWT-b6-Tls"/>
                                 </connections>
                             </button>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mRS-FS-fOL">
@@ -904,7 +904,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="decodeGeffe:" target="XfG-lQ-9wD" id="Fp9-vv-vZ3"/>
+                                    <action selector="decodeGeffe:" target="XfG-lQ-9wD" id="f2U-mf-DW5"/>
                                 </connections>
                             </button>
                         </subviews>
