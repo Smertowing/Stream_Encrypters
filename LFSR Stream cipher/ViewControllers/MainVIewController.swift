@@ -50,13 +50,11 @@ class MainVIewController: NSViewController {
                               [0,26,27,31],
                               [1,18,20,39]]
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         key1.stringValue = "101010101010101010101010"
         key2.stringValue = "10101010101010101010101010101010"
         key3.stringValue = "1010101010101010101010101010101010101010"
-        
     }
     
     @IBOutlet weak var represOfFile: NSTextField!
@@ -238,8 +236,6 @@ class MainVIewController: NSViewController {
     @IBAction func justDecode(_ sender: Any) {
         if outputBuff.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
-            key2.stringValue = key2.stringValue.filter { return ["0","1"].contains($0) }
-            key3.stringValue = key3.stringValue.filter { return ["0","1"].contains($0) }
             if (key1.stringValue.count != 24) {
                 dialogError(question: "Please, specify the key!", text: "Error: key must be 24-bit.")
             } else {
@@ -308,6 +304,8 @@ class MainVIewController: NSViewController {
     @IBAction func decodeGeffe(_ sender: Any) {
         if outputBuff.count > 0 {
             key1.stringValue = key1.stringValue.filter { return ["0","1"].contains($0) }
+            key2.stringValue = key2.stringValue.filter { return ["0","1"].contains($0) }
+            key3.stringValue = key3.stringValue.filter { return ["0","1"].contains($0) }
             if (key1.stringValue.count != 24) || (key2.stringValue.count != 32) || (key3.stringValue.count != 40) {
                 dialogError(question: "Please, specify the key!", text: "Error: keys must be 24,32,40 bit.")
             } else {
